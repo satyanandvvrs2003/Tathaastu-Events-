@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Booking - Tathaastu Events</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f2f2f2; }
+    h2 { text-align: center; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; }
+    input, select {
+      width: 100%; padding: 10px;
+      border: 1px solid #ccc; border-radius: 8px;
+    }
+    button {
+      background: #ff9c33; color: white;
+      padding: 10px 15px; border: none;
+      border-radius: 8px; cursor: pointer;
+      width: 100%; margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Book Your Vendor</h2>
+
+<form id="bookingForm">
+  <div class="form-group">
+    <label>Your Name:</label>
+    <input type="text" id="customerName" required>
+  </div>
+  <div class="form-group">
+    <label>Event Type:</label>
+    <select id="eventType">
+      <option>Wedding</option>
+      <option>Birthday</option>
+      <option>Corporate</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Event Date:</label>
+    <input type="date" id="date" required>
+  </div>
+  <button type="submit">Submit Booking</button>
+</form>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script>
+  const firebaseConfig = {
+    // 🔥 Your Firebase config here
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  const db = firebase.database();
+  const auth = firebase.auth();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const vendorId = urlParams.get("uid");
+
+  document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const customerName = document.getElementById('customerName').value;
+    const eventType = document.getElementById('eventType').value;
+    const date = document.getElementById('date').value;
+
+    const bookingData = {
+          customerName,
+          eventType,
+          date,
+          vendorId,
+          customerId: auth.currentUser.uid,
+          timestamp: Date.now()
+        };
+
+    db.ref('bookings').push(bookingData).then(() => {
+      alert("Booking submitted!");
+      window.location.href = 'explore.html';
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up - Tathaastu Events</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f2f2f2; }
+    h2 { text-align: center; color: #ff9c33; }
+    form { background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #ff9c33; color: white; padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; width: 100%; }
+    button:hover { background: #e67e22; }
+  </style>
+</head>
+<body>
+
+<h2>Sign Up</h2>
+<form id="signupForm">
+  <input type="text" id="name" placeholder="Your Name" required>
+  <input type="email" id="email" placeholder="Email Address" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+  <input type="text" id="city" placeholder="City" required>
+  <select id="userType" required>
+    <option value="">I am a...</option>
+    <option value="customer">Customer</option>
+    <option value="vendor">Vendor</option>
+  </select>
+  <button type="submit">Create Account</button>
+</form>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCj6rSxY--VUWioNHIHrw8kzf7C2i-f990",
+    authDomain: "thaastu-events.firebaseapp.com",
+    databaseURL: "https://thaastu-events-default-rtdb.firebaseio.com",
+    projectId: "thaastu-events",
+    storageBucket: "thaastu-events.appspot.com",
+    messagingSenderId: "1044759719995",
+    appId: "1:1044759719995:web:c02253409e40b36c2aec1e"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  document.getElementById("signupForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const pass = document.getElementById("password").value;
+    const confirm = document.getElementById("confirmPassword").value;
+    const city = document.getElementById("city").value;
+    const userType = document.getElementById("userType").value;
+
+    if (pass !== confirm) {
+      return alert("Passwords do not match.");
+    }
+
+    auth.createUserWithEmailAndPassword(email, pass)
+      .then((cred) => {
+        const uid = cred.user.uid;
+        return db.ref("users/" + uid).set({
+          uid,
+          name,
+          email,
+          city,
+          type: userType,
+          createdAt: Date.now()
+        }).then(() => {
+          if (userType === "vendor") {
+            window.location.href = "vendor-profile-setup.html";
+          } else {
+            window.location.href = "explore.html";
+          }
+        });
+      })
+      .catch((error) => {
+        alert("Error: " + error.message);
+      });
+  });
+</script>
+
+</body>
+</html>

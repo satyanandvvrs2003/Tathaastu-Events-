@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vendor Profile Setup - Tathaastu Events</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f2f2f2; }
+    h2 { text-align: center; color: #ff9c33; }
+    form { background: white; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, textarea, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #ff9c33; color: white; padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; width: 100%; }
+    button:hover { background: #e67e22; }
+  </style>
+</head>
+<body>
+
+<h2>Vendor Profile Setup</h2>
+<form id="profileForm">
+  <input type="text" id="name" placeholder="Your Name" required>
+  <input type="text" id="city" placeholder="City" required>
+  <select id="category" required>
+    <option value="">Select Category</option>
+    <option value="DJ">DJ</option>
+    <option value="Decorator">Decorator</option>
+    <option value="Catering">Catering</option>
+    <option value="Photography">Photography</option>
+  </select>
+  <textarea id="description" placeholder="Description" required></textarea>
+
+  <h4>Pricing Plans</h4>
+  <input type="text" id="silverPrice" placeholder="Silver Plan Price" required>
+  <input type="text" id="goldPrice" placeholder="Gold Plan Price" required>
+  <input type="text" id="premiumPrice" placeholder="Premium Plan Price" required>
+
+  <h4>Upload 4-5 Images</h4>
+  <input type="file" id="images" accept="image/*" multiple required>
+
+  <button type="submit">Submit Profile</button>
+</form>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCj6rSxY--VUWioNHIHrw8kzf7C2i-f990",
+    authDomain: "thaastu-events.firebaseapp.com",
+    databaseURL: "https://thaastu-events-default-rtdb.firebaseio.com",
+    projectId: "thaastu-events",
+    storageBucket: "thaastu-events.appspot.com",
+    messagingSenderId: "1044759719995",
+    appId: "1:1044759719995:web:c02253409e40b36c2aec1e"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+  const storage = firebase.storage();
+
+  auth.onAuthStateChanged(user => {
+    if (!user) window.location.href = "index.html";
+  });
+
+  document.getElementById('profileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const user = auth.currentUser;
+    if (!user) return alert("Login first");
+
+    const name = document.getElementById('name').value;
+    const city = document.getElementById('city').value;
+    const category = document.getElementById('category').value;
+    const description = document.getElementById('description').value;
+    const silverPrice = document.getElementById('silverPrice').value;
+    const goldPrice = document.getElementById('goldPrice').value;
+    const premiumPrice = document.getElementById('premiumPrice').value;
+    const files = document.getElementById('images').files;
+
+    if (files.length < 1 || files.length > 5) {
+      return alert("Please upload 1 to 5 images only.");
+    }
+
+    const imageUrls = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const fileRef = storage.ref(`vendorImages/${user.uid}/${Date.now()}-${files[i].name}`);
+      await fileRef.put(files[i]);
+      const url = await fileRef.getDownloadURL();
+      imageUrls.push(url);
+    }
+
+    const vendorData = {
+      uid: user.uid,
+      name,
+      city,
+      category,
+      description,
+      images: imageUrls,
+      plans: {
+        silver: silverPrice,
+        gold: goldPrice,
+        premium: premiumPrice
+      },
+      timestamp: Date.now()
+    };
+
+    await db.ref("vendors/" + user.uid).set(vendorData);
+    alert("Profile saved!");
+    window.location.href = "vendor-dashboard.html";
+  });
+</script>
+
+</body>
+</html>

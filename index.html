@@ -1,0 +1,315 @@
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tathaastu Events</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: #f9f9f9;
+    }
+
+    /* Welcome Animation */
+    #welcomeScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #ff9c33;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  color: white;
+  font-family: 'Brush Script MT', cursive;
+  text-align: center;
+}
+
+#welcomeText {
+  font-size: 42px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px white, 0 0 20px white;
+  max-width: 90%;
+}
+
+    .top-bar {
+      background: #ff9c33;
+      padding: 12px 20px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    .location {
+      font-size: 13px;
+    }
+
+    .hamburger {
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      display: none;
+      flex-direction: column;
+      padding: 10px;
+      z-index: 999;
+      min-width: 180px;
+    }
+
+    .dropdown-menu a,
+    .dropdown-menu button {
+      padding: 10px;
+      text-align: left;
+      font-size: 14px;
+      color: #333;
+      background: none;
+      border: none;
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .dropdown-menu a:hover,
+    .dropdown-menu button:hover {
+      background: #ff9c33;
+      color: white;
+    }
+
+    .categories {
+      display: flex;
+      justify-content: space-around;
+      background: white;
+      padding: 10px 0;
+    }
+
+    .category {
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .search-bar {
+      margin: 10px;
+      display: flex;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .banner {
+      background: url('https://via.placeholder.com/350x100?text=Promo+Banner') no-repeat center;
+      background-size: cover;
+      height: 100px;
+      margin: 10px;
+      border-radius: 10px;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: space-around;
+      background: white;
+      padding: 8px 0;
+      font-size: 13px;
+    }
+
+    .vendor-section {
+      margin: 10px;
+    }
+
+    .vendors {
+      display: flex;
+      overflow-x: auto;
+      gap: 10px;
+    }
+
+    .vendor-card {
+      min-width: 140px;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+    }
+
+    .vendor-card img {
+      border-radius: 8px;
+      height: 100px;
+      object-fit: cover;
+      width: 100%;
+    }
+
+    h3 {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Welcome Animation -->
+  <div id="welcomeScreen">
+    <h1 id="welcomeText"></h1>
+  </div>
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div>
+      <strong>Tathaastu Events</strong>
+      <div class="location">📍 Patna, Bihar</div>
+    </div>
+    <div style="position: relative;">
+      <button class="hamburger" onclick="toggleMenu()">☰</button>
+      <div class="dropdown-menu" id="dropdownMenu">
+        <a href="signup.html">Sign Up</a>
+        <a href="login.html">Login</a>
+        <a href="explore.html">Explore DJs & Decorators</a>
+        <a href="my-bookings.html" id="myBookingsLink" style="display: none;">My Bookings</a>
+        <button onclick="logout()" id="logoutBtn" style="display: none;">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="categories">
+    <div class="category">DJ</div>
+    <div class="category">Decorator</div>
+    <div class="category">Catering</div>
+    <div class="category">Photography</div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" placeholder="Search vendors...">
+  </div>
+
+  <div class="banner"></div>
+
+  <div class="tabs">
+    <div>For You</div>
+    <div>Wedding</div>
+    <div>Birthday</div>
+    <div>Corporate</div>
+  </div>
+
+  <div class="vendor-section">
+    <h3>Recommended Vendors</h3>
+    <div class="vendors" id="vendorList">
+      <!-- Vendors from Firebase will load here -->
+    </div>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCj6rSxY--VUWioNHIHrw8kzf7C2i-f990",
+      authDomain: "thaastu-events.firebaseapp.com",
+      databaseURL: "https://thaastu-events-default-rtdb.firebaseio.com",
+      projectId: "thaastu-events",
+      storageBucket: "thaastu-events.appspot.com",
+      messagingSenderId: "1044759719995",
+      appId: "1:1044759719995:web:c02253409e40b36c2aec1e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    const vendorList = document.getElementById("vendorList");
+    const vendorsRef = ref(db, "vendors/");
+    onValue(vendorsRef, (snapshot) => {
+      vendorList.innerHTML = "";
+      const data = snapshot.val();
+      if (data) {
+        Object.keys(data).forEach((key) => {
+          const vendor = data[key];
+          const card = `
+            <div class="vendor-card" onclick="window.location.href='dj-profile.html?uid=${vendor.uid}'">
+              <img src="${vendor.photo}" alt="${vendor.name}" />
+              <p><strong>${vendor.name}</strong></p>
+              <p>${vendor.category} - ${vendor.city}</p>
+            </div>
+          `;
+          vendorList.innerHTML += card;
+        });
+      } else {
+        vendorList.innerHTML = "<p>No vendors yet</p>";
+      }
+    });
+
+    const logoutBtn = document.getElementById("logoutBtn");
+    const myBookingsLink = document.getElementById("myBookingsLink");
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        logoutBtn.style.display = "block";
+        myBookingsLink.style.display = "block";
+      } else {
+        logoutBtn.style.display = "none";
+        myBookingsLink.style.display = "none";
+      }
+    });
+
+    window.logout = function () {
+      signOut(auth).then(() => {
+        alert("Logged out");
+        location.reload();
+      });
+    };
+
+    window.toggleMenu = function () {
+      const dropdown = document.getElementById("dropdownMenu");
+      dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+    };
+  </script>
+
+  <!-- Welcome Script -->
+  <script>
+    const text = "Welcome to Tathaastu Events";
+    let i = 0;
+    const speed = 100;
+    const welcomeEl = document.getElementById("welcomeText");
+
+    function typeWriter() {
+      if (i < text.length) {
+        welcomeEl.innerHTML += text.charAt(i);
+        i++;
+        setTimeout(typeWriter, speed);
+      } else {
+        setTimeout(() => {
+          document.getElementById("welcomeScreen").style.display = "none";
+        }, 1800);
+      }
+    }
+
+    window.onload = function () {
+      typeWriter();
+    };
+  </script>
+
+</body>
+</html>

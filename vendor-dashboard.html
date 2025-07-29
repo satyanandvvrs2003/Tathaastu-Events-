@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vendor Dashboard - Tathaastu Events</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; background: #f4f4f4; padding: 20px; }
+    h2 { text-align: center; color: #ff9c33; }
+    .section {
+      margin-top: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px #ccc;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 🔓 Logout Button -->
+<button onclick="logout()" style="position: fixed; top: 10px; right: 10px; background: #ff4d4d; color: white; padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer;">Logout</button>
+
+<!-- ⏳ Loader -->
+<div id="loader" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+  <div class="spinner" style="border: 5px solid #f3f3f3; border-top: 5px solid #ff9c33; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
+</div>
+<style>
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+
+<h2>Your Dashboard</h2>
+<div class="section" id="profileSection"></div>
+<div class="section" id="bookingSection"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<script>
+  const firebaseConfig = {
+    // 🔥 Your Firebase config here
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  const loader = document.getElementById('loader');
+  const profileSection = document.getElementById('profileSection');
+  const bookingSection = document.getElementById('bookingSection');
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      const uid = user.uid;
+
+      firebase.database().ref('vendors/' + uid).once('value').then(snapshot => {
+        const data = snapshot.val();
+        profileSection.innerHTML = `<h3>Welcome, ${data.name}</h3><p>Category: ${data.category}</p>`;
+      });
+
+      firebase.database().ref('bookings').orderByChild('vendorId').equalTo(uid).once('value').then(snapshot => {
+        loader.style.display = 'none';
+        if (!snapshot.exists()) {
+          bookingSection.innerHTML = '<p>No bookings yet.</p>';
+        } else {
+          snapshot.forEach(child => {
+            const data = child.val();
+            const div = document.createElement('div');
+            div.innerHTML = `<p><strong>${data.eventType}</strong> on ${data.date} by ${data.customerName}</p>`;
+            bookingSection.appendChild(div);
+          });
+        }
+      });
+
+    } else {
+      window.location.href = 'index.html';
+    }
+  });
+
+  function logout() {
+    firebase.auth().signOut().then(() => {
+      window.location.href = 'index.html';
+    }).catch(error => {
+      alert('Logout failed: ' + error.message);
+    });
+  }
+</script>
+</body>
+</html>
