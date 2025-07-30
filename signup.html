@@ -2,89 +2,146 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Sign Up - Tathaastu Events</title>
+  <title>Signup - Tathaastu Events</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f2f2f2; }
-    h2 { text-align: center; color: #ff9c33; }
-    form { background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    input, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; }
-    button { background: #ff9c33; color: white; padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; width: 100%; }
-    button:hover { background: #e67e22; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f7f7f7;
+      padding: 20px;
+    }
+
+    .signup-container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #ff9c33;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background: #ff9c33;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #e07c00;
+    }
   </style>
 </head>
 <body>
 
-<h2>Sign Up</h2>
-<form id="signupForm">
-  <input type="text" id="name" placeholder="Your Name" required>
-  <input type="email" id="email" placeholder="Email Address" required>
-  <input type="password" id="password" placeholder="Password" required>
-  <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
-  <input type="text" id="city" placeholder="City" required>
-  <select id="userType" required>
-    <option value="">I am a...</option>
-    <option value="customer">Customer</option>
-    <option value="vendor">Vendor</option>
-  </select>
-  <button type="submit">Create Account</button>
-</form>
+  <div class="signup-container">
+    <h2>Create Your Account</h2>
+    <form id="signupForm">
+      <label>Full Name</label>
+      <input type="text" id="name" required />
 
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+      <label>Email</label>
+      <input type="email" id="email" required />
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCj6rSxY--VUWioNHIHrw8kzf7C2i-f990",
-    authDomain: "thaastu-events.firebaseapp.com",
-    databaseURL: "https://thaastu-events-default-rtdb.firebaseio.com",
-    projectId: "thaastu-events",
-    storageBucket: "thaastu-events.appspot.com",
-    messagingSenderId: "1044759719995",
-    appId: "1:1044759719995:web:c02253409e40b36c2aec1e"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
+      <label>Password</label>
+      <input type="password" id="password" required />
 
-  document.getElementById("signupForm").addEventListener("submit", function (e) {
-    e.preventDefault();
+      <label>Confirm Password</label>
+      <input type="password" id="confirmPassword" required />
 
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    const pass = document.getElementById("password").value;
-    const confirm = document.getElementById("confirmPassword").value;
-    const city = document.getElementById("city").value;
-    const userType = document.getElementById("userType").value;
+      <label>Account Type</label>
+      <select id="accountType" required>
+        <option value="">Select</option>
+        <option value="vendor">Vendor</option>
+        <option value="customer">Customer</option>
+      </select>
 
-    if (pass !== confirm) {
-      return alert("Passwords do not match.");
-    }
+      <button type="submit">Sign Up</button>
+    </form>
+  </div>
 
-    auth.createUserWithEmailAndPassword(email, pass)
-      .then((cred) => {
-        const uid = cred.user.uid;
-        return db.ref("users/" + uid).set({
-          uid,
-          name,
-          email,
-          city,
-          type: userType,
-          createdAt: Date.now()
-        }).then(() => {
-          if (userType === "vendor") {
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCj6rSxY--VUWioNHIHrw8kzf7C2i-f990",
+      authDomain: "thaastu-events.firebaseapp.com",
+      databaseURL: "https://thaastu-events-default-rtdb.firebaseio.com",
+      projectId: "thaastu-events",
+      storageBucket: "thaastu-events.appspot.com",
+      messagingSenderId: "1044759719995",
+      appId: "1:1044759719995:web:c02253409e40b36c2aec1e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const signupForm = document.getElementById("signupForm");
+
+    signupForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+      const accountType = document.getElementById("accountType").value;
+
+      if (password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+      }
+
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const uid = userCredential.user.uid;
+          const userData = {
+            name,
+            email,
+            accountType
+          };
+
+          set(ref(db, "users/" + uid), userData);
+
+          if (accountType === "vendor") {
             window.location.href = "vendor-profile-setup.html";
           } else {
             window.location.href = "explore.html";
           }
+        })
+        .catch((error) => {
+          alert("Error: " + error.message);
         });
-      })
-      .catch((error) => {
-        alert("Error: " + error.message);
-      });
-  });
-</script>
+    });
+  </script>
 
 </body>
 </html>
